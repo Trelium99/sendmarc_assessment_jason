@@ -58,10 +58,24 @@ Once preflight succeeds:
 2. Read [ASSIGNMENT.md](ASSIGNMENT.md).
 3. Complete as much useful work as you can within the timebox.
 4. Fill in [SOLUTION.md](SOLUTION.md).
+5. Stop editing when the timer ends, then record the walkthrough described below.
 
 The assessment timebox is **4 hours**. Stop working when the four hours are complete. Incomplete work is acceptable; prioritisation and clearly explained scope cuts are part of the assessment.
 
 You may use your normal AI tools. Record how you used them in `SOLUTION.md`.
+
+## Walkthrough recording
+
+After the implementation timebox, submit a **10–15 minute screen recording** walking through:
+
+- what you built and how it works
+- the trade-offs you considered and why you made key decisions
+- where you got stuck and how you worked through it
+- decisions you changed along the way and what drove those changes
+- how AI tools influenced your approach
+- what you would do differently with more time
+
+The recording is additional to the four-hour implementation timebox. You may run and demonstrate the application.
 
 ## Reference domains
 
@@ -85,6 +99,7 @@ Submit:
 
 - your repository or patch
 - the completed `SOLUTION.md`
+- the walkthrough recording or a link to it
 - the actual time you spent on the timed assessment
 - any setup or environment problems you encountered
 

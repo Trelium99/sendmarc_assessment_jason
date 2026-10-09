@@ -55,3 +55,5 @@ These are prompts, not a checklist. You are not expected to address all of them.
 Complete `SOLUTION.md` alongside your implementation. Keep it concise—approximately 750 words or fewer.
 
 Incomplete work is acceptable. Explain deliberate omissions, important risks, and what you would do next.
+
+After the four-hour implementation timebox, record the 10–15 minute walkthrough described in `README.md`. The recording time is additional.

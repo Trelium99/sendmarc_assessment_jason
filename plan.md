@@ -1,6 +1,6 @@
 # Implementation plan
 
-Aligned with [ASSIGNMENT.md](ASSIGNMENT.md), [SOLUTION.md](SOLUTION.md), and the two-part goal: **readable results UI** + **`score_domain` WebMCP** + **on-page assistant** over shared state.
+Aligned with [ASSIGNMENT.md](ASSIGNMENT.md), [SOLUTION.md](SOLUTION.md), and the two-part goal: **readable results UI** + `**score_domain` WebMCP** + **on-page assistant** over shared state.
 
 **Timebox:** 4 hours implementation (README). Treat phases below as priority order—stop at a clean milestone rather than finishing every optional item.
 
@@ -8,42 +8,50 @@ Aligned with [ASSIGNMENT.md](ASSIGNMENT.md), [SOLUTION.md](SOLUTION.md), and the
 
 ## Success criteria (definition of done)
 
-| Must have | Check |
-|-----------|--------|
-| `npm run build` passes | |
-| `/domain-score` works for form + all five reference domains | |
-| Tool Inspector lists and invokes **`score_domain`** | |
-| Tool returns fixture JSON; unsupported domain fails clearly | |
-| Results UI is clearly better than raw `<pre>` JSON | |
-| Tool run updates the same UI as the form (shared flow) | |
-| `SOLUTION.md` updated (remove “planned” placeholders where done) | |
 
-| Should have (if time) | |
-|------------------------|---|
-| Corner assistant triggers lookup via `executeTool` | |
-| Assistant answers 2–3 follow-ups from **current** result (no JSON dump) | |
-| Collapsed “Technical details” JSON | |
-| One extra read-only tool (e.g. `get_current_assessment`) | |
+| Must have                                                        | Check |
+| ---------------------------------------------------------------- | ----- |
+| `npm run build` passes                                           |       |
+| `/domain-score` works for form + all five reference domains      |       |
+| Tool Inspector lists and invokes `**score_domain**`              |       |
+| Tool returns fixture JSON; unsupported domain fails clearly      |       |
+| Results UI is clearly better than raw `<pre>` JSON               |       |
+| Tool run updates the same UI as the form (shared flow)           |       |
+| `SOLUTION.md` updated (remove “planned” placeholders where done) |       |
 
-| Cut line (defer) | |
-|------------------|---|
-| Real LLM in assistant (use keyword / rule routing first) | |
-| Analytics, auth, multi-page tools | |
-| `webmcp-types` npm package (optional; inline `vite-env.d.ts` is enough) | |
+
+
+| Should have (if time)                                                   |     |
+| ----------------------------------------------------------------------- | --- |
+| Corner assistant triggers lookup via `executeTool`                      |     |
+| Assistant answers 2–3 follow-ups from **current** result (no JSON dump) |     |
+| Collapsed “Technical details” JSON                                      |     |
+| One extra read-only tool (e.g. `get_current_assessment`)                |     |
+
+
+
+| Cut line (defer)                                                        |     |
+| ----------------------------------------------------------------------- | --- |
+| Real LLM in assistant (use keyword / rule routing first)                |     |
+| Analytics, auth, multi-page tools                                       |     |
+| `webmcp-types` npm package (optional; inline `vite-env.d.ts` is enough) |     |
+
 
 ---
 
 ## Suggested time budget
 
-| Phase | Focus | ~minutes |
-|-------|--------|----------|
-| 0 | Preflight + skim fixtures | 15 |
-| 1 | Types + view model from fixture JSON | 45 |
-| 2 | Results UI (Part 1) | 75 |
-| 3 | Shared lookup state + wire form | 30 |
-| 4 | `score_domain` + WebMCP types | 45 |
-| 5 | On-page assistant | 60 |
-| 6 | Polish, a11y pass, validation, `SOLUTION.md` | 30 |
+
+| Phase | Focus                                        | ~minutes |
+| ----- | -------------------------------------------- | -------- |
+| 0     | Preflight + skim fixtures                    | 15       |
+| 1     | Types + view model from fixture JSON         | 45       |
+| 2     | Results UI (Part 1)                          | 75       |
+| 3     | Shared lookup state + wire form              | 30       |
+| 4     | `score_domain` + WebMCP types                | 45       |
+| 5     | On-page assistant                            | 60       |
+| 6     | Polish, a11y pass, validation, `SOLUTION.md` | 30       |
+
 
 ---
 
@@ -67,10 +75,10 @@ DomainScorePage
 
 ## Phase 0 — Preflight
 
-- [ ] `npm ci && npm run build && npm run dev`
-- [ ] Chrome: `chrome://flags/#enable-webmcp-testing` → Enabled
-- [ ] Model Context Tool Inspector on `http://localhost:5173/domain-score` (no tools yet)
-- [ ] Skim one fixture per scenario: `neverssl.com`, `mit.edu`, `github.com`, `sendmarc.com`, `uber.com`
+- [x] `npm ci && npm run build && npm run dev`
+- [x] Chrome: `chrome://flags/#enable-webmcp-testing` → Enabled
+- [x] Model Context Tool Inspector on `http://localhost:5173/domain-score` (no tools yet)
+- [x] Skim one fixture per scenario: `neverssl.com`, `mit.edu`, `github.com`, `sendmarc.com`, `uber.com`
 
 Note useful fields for the view model:
 
@@ -154,13 +162,15 @@ Register on mount from `DomainScorePage` (or dedicated hook `useWebMcpTools`):
 
 ### `score_domain` (required)
 
-| Field | Guidance |
-|-------|----------|
-| `name` | `score_domain` |
-| `description` | Domain security assessment (demo). List five supported domains. Returns full assessment payload. |
-| `inputSchema` | `{ domain: string }`, required |
-| `annotations` | `readOnlyHint: true` |
-| `execute` | normalise → `runLookup(domain)` → return **raw fixture**; on failure return/throw structured error |
+
+| Field         | Guidance                                                                                           |
+| ------------- | -------------------------------------------------------------------------------------------------- |
+| `name`        | `score_domain`                                                                                     |
+| `description` | Domain security assessment (demo). List five supported domains. Returns full assessment payload.   |
+| `inputSchema` | `{ domain: string }`, required                                                                     |
+| `annotations` | `readOnlyHint: true`                                                                               |
+| `execute`     | normalise → `runLookup(domain)` → return **raw fixture**; on failure return/throw structured error |
+
 
 **Important:** `execute` must call the same `runLookup` that drives the UI so the inspector demo shows the page updating.
 
@@ -190,9 +200,9 @@ Use `AbortController` in `useEffect` cleanup to unregister.
 **V1 behaviour (deterministic, no API keys):**
 
 1. Parse intent with simple rules:
-   - Domain-like token or “score/check …” → `executeTool(score_domain, { domain })`
-   - “policy” / “dmarc” / “score” / “warnings” with existing result → answer from `AssessmentViewModel`
-   - Else → short help (“Ask me to check sendmarc.com, or ask about DMARC policy after a lookup.”)
+  - Domain-like token or “score/check …” → `executeTool(score_domain, { domain })`
+  - “policy” / “dmarc” / “score” / “warnings” with existing result → answer from `AssessmentViewModel`
+  - Else → short help (“Ask me to check sendmarc.com, or ask about DMARC policy after a lookup.”)
 2. Assistant replies in 2–4 sentences; never paste full JSON.
 
 **V2 (only if time):** call `getTools()` dynamically instead of hard-coding tool names.
@@ -213,30 +223,34 @@ Use `AbortController` in `useEffect` cleanup to unregister.
 
 ## Reference domain test matrix
 
-| Domain | Expect in UI (headline) |
-|--------|-------------------------|
-| `neverssl.com` | No / missing DMARC, low score |
-| `mit.edu` | DMARC present, `p=none` (monitoring) |
-| `github.com` | `p=quarantine` |
-| `sendmarc.com` | Strong score, `p=reject` |
-| `uber.com` | SPF / lookup warning surfaced |
-| `example.com` | Unsupported fixture error |
+
+| Domain         | Expect in UI (headline)              |
+| -------------- | ------------------------------------ |
+| `neverssl.com` | No / missing DMARC, low score        |
+| `mit.edu`      | DMARC present, `p=none` (monitoring) |
+| `github.com`   | `p=quarantine`                       |
+| `sendmarc.com` | Strong score, `p=reject`             |
+| `uber.com`     | SPF / lookup warning surfaced        |
+| `example.com`  | Unsupported fixture error            |
+
 
 ---
 
 ## File checklist (expected new/edited)
 
-| Action | Path |
-|--------|------|
-| Edit | `src/pages/DomainScorePage.tsx` |
-| Add | `src/hooks/useDomainAssessment.ts` |
-| Add | `src/lib/mapAssessment.ts` |
-| Add | `src/types/score.ts` |
-| Add | `src/components/DomainScoreResults.tsx` |
-| Add | `src/components/PageAssistant.tsx` |
-| Add | `src/webmcp/registerTools.ts` |
-| Edit | `src/vite-env.d.ts` |
-| Edit | `SOLUTION.md` |
+
+| Action | Path                                    |
+| ------ | --------------------------------------- |
+| Edit   | `src/pages/DomainScorePage.tsx`         |
+| Add    | `src/hooks/useDomainAssessment.ts`      |
+| Add    | `src/lib/mapAssessment.ts`              |
+| Add    | `src/types/score.ts`                    |
+| Add    | `src/components/DomainScoreResults.tsx` |
+| Add    | `src/components/PageAssistant.tsx`      |
+| Add    | `src/webmcp/registerTools.ts`           |
+| Edit   | `src/vite-env.d.ts`                     |
+| Edit   | `SOLUTION.md`                           |
+
 
 ---
 
@@ -253,12 +267,14 @@ Use `AbortController` in `useEffect` cleanup to unregister.
 
 ## Risks and mitigations
 
-| Risk | Mitigation |
-|------|------------|
-| `document.modelContext` undefined outside Chrome/flag | Document in SOLUTION; test only in flagged Chrome |
-| Tool registers twice on HMR | AbortSignal on cleanup; single registration hook |
-| 4h overrun | Ship Phase 1–4 before assistant; assistant can be rule-only |
-| Fixture shape drift | map layer isolates UI from full JSON |
+
+| Risk                                                  | Mitigation                                                  |
+| ----------------------------------------------------- | ----------------------------------------------------------- |
+| `document.modelContext` undefined outside Chrome/flag | Document in SOLUTION; test only in flagged Chrome           |
+| Tool registers twice on HMR                           | AbortSignal on cleanup; single registration hook            |
+| 4h overrun                                            | Ship Phase 1–4 before assistant; assistant can be rule-only |
+| Fixture shape drift                                   | map layer isolates UI from full JSON                        |
+
 
 ---
 

@@ -3,6 +3,7 @@ import mit from "./fixtures/mit.edu.json";
 import neverssl from "./fixtures/neverssl.com.json";
 import sendmarc from "./fixtures/sendmarc.com.json";
 import uber from "./fixtures/uber.com.json";
+import { DEMO_DOMAINS } from "./lib/supported-domains.ts";
 
 const byDomain: Record<string, unknown> = {
   "neverssl.com": neverssl,
@@ -17,5 +18,7 @@ export function fixtureFor(domain: string): unknown {
   if (key in byDomain) {
     return byDomain[key];
   }
-  throw new Error(`No fixture for ${domain}`);
+  throw new Error(
+    `No fixture for ${domain}. Demo domains: ${DEMO_DOMAINS.join(", ")}.`,
+  );
 }

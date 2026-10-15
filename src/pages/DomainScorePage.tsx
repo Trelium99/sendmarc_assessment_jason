@@ -1,35 +1,22 @@
-import { useState, type FormEvent } from "react";
-import { getScore } from "../api/score.ts";
+import { type FormEvent } from "react";
+import { LookupActivityPanel } from "../components/lookup_activity_panel.tsx";
+import { PageAssistant } from "../components/page_assistant.tsx";
 import ResponseUI from "../components/response_ui.tsx";
+import { useDomainAssessment } from "../hooks/useDomainAssessment.ts";
+import { useWebMcpTools } from "../hooks/useWebMcpTools.ts";
 import { isDomainScoreResponse } from "../lib/format-response-sections.ts";
 
-type LookupState =
-  | { status: "idle" }
-  | { status: "loading" }
-  | { status: "error"; message: string }
-  | { status: "ok"; data: unknown };
-
 export function DomainScorePage() {
-  const [domain, setDomain] = useState("");
-  const [lookup, setLookup] = useState<LookupState>({ status: "idle" });
+  const { domainInput, setDomainInput, lookup, runLookup } = useDomainAssessment();
+
+  useWebMcpTools(runLookup);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const value = domain.trim();
-    if (!value) {
-      setLookup({ status: "error", message: "Enter a domain." });
-      return;
-    }
-
-    setLookup({ status: "loading" });
     try {
-      const data = await getScore(value);
-      setLookup({ status: "ok", data });
-    } catch (error) {
-      setLookup({
-        status: "error",
-        message: error instanceof Error ? error.message : "Lookup failed.",
-      });
+      await runLookup(domainInput, { activitySource: "form" });
+    } catch {
+      // State updated in runLookup
     }
   }
 
@@ -37,12 +24,14 @@ export function DomainScorePage() {
     <main className="mx-auto max-w-6xl p-6">
       <h1 className="mb-4 text-xl font-semibold">Domain score</h1>
 
+      <LookupActivityPanel />
+
       <form onSubmit={onSubmit} className="mb-6 flex gap-2">
         <input
           name="domain"
           type="text"
-          value={domain}
-          onChange={(event) => setDomain(event.target.value)}
+          value={domainInput}
+          onChange={(event) => setDomainInput(event.target.value)}
           placeholder="example.com"
           autoCapitalize="none"
           autoCorrect="off"
@@ -71,6 +60,8 @@ export function DomainScorePage() {
       ) : lookup.status === "ok" ? (
         <p className="text-red-600 dark:text-red-400">Unexpected response format.</p>
       ) : null}
+
+      <PageAssistant lookup={lookup} runLookup={runLookup} />
     </main>
   );
 }

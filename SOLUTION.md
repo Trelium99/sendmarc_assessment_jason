@@ -53,10 +53,14 @@
 ## AI use
 
 I used Cursor as my primary AI tooling. I used it to brainstorm implementation and understand the real world use case for MCPWebTooling as a technology I have not previously implemented before. I used it for boilerplate generation, and UI component iteration quickly.   
-  
+
 Key point:  
+
 - Fast UI implementation
 - Bridge the knolwedge gap on a new tech (MCPWebtools)
+- Documentation
+
+
 
 ## Validation
 
